@@ -1,0 +1,1 @@
+käivitada "pygame_joonistav.py"
