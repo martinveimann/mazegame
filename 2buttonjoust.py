@@ -40,7 +40,10 @@ class player:
 
 	def jump(self):
 		self.xSpeed += 0.08
-		self.ySpeed = -10
+		if self.ySpeed <= -7:
+			self.ySpeed = self.ySpeed - 5
+		else:
+			self.ySpeed = -10
 
 	def changeDirection(self):
 		self.direction = self.direction * -1
@@ -56,6 +59,23 @@ class player:
 			self.ySpeed = self.ySpeed * -1
 		self.yPos += self.ySpeed
 		self.ySpeed += 1
+
+		#todo collision detection and concequenses
+
+class enemy(player):
+
+	def __init__(self):
+		player.__init__(self)
+		self.xPos = 720
+		self.direction = -1
+		self.cd = 0 #jump cooldown for AI
+
+	#def AI(self, enemyPosition):
+	#	if cd <= 0:
+
+opponent = enemy()
+print(opponent.xPos)
+print(opponent.direction)
 
 a = player()
 clock = pygame.time.Clock()
