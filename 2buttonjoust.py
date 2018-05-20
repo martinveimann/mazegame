@@ -8,6 +8,7 @@ ekraan = pygame.display.set_mode((800, 600))
 
 porand_pilt = pygame.image.load("sein.png")
 player_pilt = pygame.image.load("uus_kast.png")
+enemy_pilt = pygame.image.load("kuri_ring.png")
 ekraan.blit(porand_pilt, (0, 200))
 """
 #map layout
@@ -40,23 +41,27 @@ class player:
 
 	def jump(self):
 		self.xSpeed += 0.08
-		if self.ySpeed <= -7:
-			self.ySpeed = self.ySpeed - 5
+		if self.ySpeed <= -2:
+			self.ySpeed = -12
 		else:
 			self.ySpeed = -10
 
 	def changeDirection(self):
 		self.direction = self.direction * -1
-		self.xSpeed = self.xSpeed * 0.9
+		if self.xSpeed > 3:
+			self.xSpeed = self.xSpeed * 0.9
 
 	def nextFramePosition(self):
 		if self.xPos >= 780 and self.direction == 1:
 			self.xPos = 0
+
 		elif self.xPos <= 0 and self.direction == -1:
 			self.xPos = 780
+
 		self.xPos += self.xSpeed * self.direction
 		if self.yPos <= 20 and self.ySpeed < 0:
 			self.ySpeed = self.ySpeed * -1
+
 		self.yPos += self.ySpeed
 		self.ySpeed += 1
 
@@ -68,10 +73,43 @@ class enemy(player):
 		player.__init__(self)
 		self.xPos = 720
 		self.direction = -1
-		self.cd = 0 #jump cooldown for AI
+		self.jumpCD = 0 #jump cooldown for AI
+		self.directionCD = 0 #direction change cooldown for AI
 
-	#def AI(self, enemyPosition):
-	#	if cd <= 0:
+	def jump(self):
+		super().jump()
+		self.jumpCD = 300
+		print(self.jumpCD)
+
+	def changeDirection(self):
+		super().changeDirection()
+		self.directionCD = 300
+		print(self.directionCD)
+
+	def AI(self, playerPosition):
+		self.jumpCD -= 1
+		self.directionCD -=1
+
+		if self.jumpCD <= 0:
+			if self.yPos >= 500:
+				player.jump(self)
+
+			if playerPosition[0] - self.xPos < 0:
+				if self.direction == -1:
+					if 0 > playerPosition[1] - self.yPos > -50:
+						player.jump(self)
+			else:
+				if self.direction == 1:
+					if 0 > playerPosition[1] - self.yPos > -50:
+						player.jump(self)
+
+
+		if self.yPos > playerPosition[1]:
+			if self.directionCD <= 0:
+				if abs(abs(playerPosition[0]) - abs(self.xPos)) < 50:
+					player.changeDirection(self)
+					self.directionCD = 300
+
 
 opponent = enemy()
 print(opponent.xPos)
@@ -93,9 +131,15 @@ while True:
 			#jump
 			a.jump()
 
+
+
 	a.nextFramePosition()
 	pygame.draw.rect(ekraan, [40, 40, 40], [0, 0, 800, 600], 0)
 	ekraan.blit(player_pilt, (a.xPos, a.yPos))
+	ekraan.blit(enemy_pilt, (opponent.xPos, opponent.yPos))
+	opponent.AI([a.xPos, a.yPos])
+	opponent.nextFramePosition()
 	for i in range(len(map)):
 		ekraan.blit(porand_pilt, (map[i][0]*20, map[i][1]*20))
+
 	pygame.display.flip()
