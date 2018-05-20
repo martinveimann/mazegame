@@ -30,14 +30,20 @@ map = [[0, 10], [1, 10], [2, 10], [3, 10], [4, 10], [5, 10], [6, 10], [7, 10], [
 
 
 
-class player:
+class player(pygame.sprite.Sprite):
 
 	def __init__(self):
-		self.xPos = 100
-		self.yPos = 100
+		
 		self.xSpeed = 5
 		self.ySpeed = 0
 		self.direction = 1
+
+		pygame.sprite.Sprite.__init__(self)
+		self.image = player_pilt
+		self.rect = self.image.get_rect()
+
+		self.rect.x = 100
+		self.rect.y = 100
 
 	def jump(self):
 		self.xSpeed += 0.08
@@ -52,18 +58,20 @@ class player:
 			self.xSpeed = self.xSpeed * 0.9
 
 	def nextFramePosition(self):
-		if self.xPos >= 780 and self.direction == 1:
-			self.xPos = 0
+		if self.rect.x >= 780 and self.direction == 1:
+			self.rect.x = 0
 
-		elif self.xPos <= 0 and self.direction == -1:
-			self.xPos = 780
+		elif self.rect.x <= 0 and self.direction == -1:
+			self.rect.x = 780
 
-		self.xPos += self.xSpeed * self.direction
-		if self.yPos <= 20 and self.ySpeed < 0:
+		self.rect.x += self.xSpeed * self.direction
+		if self.rect.y <= 20 and self.ySpeed < 0:
 			self.ySpeed = self.ySpeed * -1
 
-		self.yPos += self.ySpeed
+		self.rect.y += self.ySpeed
 		self.ySpeed += 1
+
+	#def collisionDetector():
 
 		#todo collision detection and concequenses
 
@@ -71,38 +79,42 @@ class enemy(player):
 
 	def __init__(self):
 		player.__init__(self)
-		self.xPos = 720
+		self.rect.x = 720
 		self.direction = -1
 		self.jumpCD = 0 #jump cooldown for AI
 		self.directionCD = 0 #direction change cooldown for AI
+		self.image = enemy_pilt
 
 	def AI(self, playerPosition):
 		self.jumpCD -= 1
 		self.directionCD -=1
 
 		if self.jumpCD <= 0:
-			if self.yPos >= 500:
+			if self.rect.y >= 500:
 				player.jump(self)
 
-			if playerPosition[0] - self.xPos < 0:
+			if playerPosition[0] - self.rect.x < 0:
 				if self.direction == -1:
-					if 0 > playerPosition[1] - self.yPos > -50:
+					if 0 > playerPosition[1] - self.rect.y > -50:
 						player.jump(self)
 			else:
 				if self.direction == 1:
-					if 0 > playerPosition[1] - self.yPos > -50:
+					if 0 > playerPosition[1] - self.rect.y > -50:
 						player.jump(self)
 
 
-		if self.yPos > playerPosition[1]:
+		if self.rect.y > playerPosition[1]:
 			if self.directionCD <= 0:
-				if abs(abs(playerPosition[0]) - abs(self.xPos)) < 50:
+				if abs(abs(playerPosition[0]) - abs(self.rect.x)) < 50:
 					player.changeDirection(self)
 					self.directionCD = 300
 
+	def colliderDetector(self, sprite, ekraan):
+		return self.rect.colliderect(sprite)
+
 
 opponent = enemy()
-print(opponent.xPos)
+print(opponent.rect.x)
 print(opponent.direction)
 
 a = player()
@@ -125,10 +137,27 @@ while True:
 
 	a.nextFramePosition()
 	pygame.draw.rect(ekraan, [40, 40, 40], [0, 0, 800, 600], 0)
-	ekraan.blit(player_pilt, (a.xPos, a.yPos))
-	ekraan.blit(enemy_pilt, (opponent.xPos, opponent.yPos))
-	opponent.AI([a.xPos, a.yPos])
+	ekraan.blit(a.image, (a.rect.x, a.rect.y))
+	ekraan.blit(opponent.image, (opponent.rect.x, opponent.rect.y))
+	opponent.AI([a.rect.x, a.rect.y])
 	opponent.nextFramePosition()
+
+	if opponent.colliderDetector(a, ekraan):
+		if opponent.rect.y < a.rect.y:
+				tekst = ("YOU LOSE")
+				print("w")
+		elif opponent.rect.y > a.rect.y:
+				tekst = ("YOU WIN")
+				print("l")
+		pygame.font.init()
+		myFont = pygame.font.SysFont("Comic Sans MS", 30)
+		textsurface = myFont.render(tekst, False, (220, 220, 0))
+		ekraan.blit(textsurface, (100, 100))
+		while True:
+			import time
+			pygame.display.flip()
+			time.sleep(1)
+
 	for i in range(len(map)):
 		ekraan.blit(porand_pilt, (map[i][0]*20, map[i][1]*20))
 
