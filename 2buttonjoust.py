@@ -76,16 +76,6 @@ class enemy(player):
 		self.jumpCD = 0 #jump cooldown for AI
 		self.directionCD = 0 #direction change cooldown for AI
 
-	def jump(self):
-		super().jump()
-		self.jumpCD = 300
-		print(self.jumpCD)
-
-	def changeDirection(self):
-		super().changeDirection()
-		self.directionCD = 300
-		print(self.directionCD)
-
 	def AI(self, playerPosition):
 		self.jumpCD -= 1
 		self.directionCD -=1
