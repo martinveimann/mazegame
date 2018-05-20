@@ -2,6 +2,7 @@
 import anna_mulle_maze_ja_andmed
 from pprint import *
 from kasulikud_funktsioonid import *
+import twobuttonjoust
 import pygame
 maze_andmed = anna_mulle_maze_ja_andmed.tagasta_maze_ja_andmed([15, 15])
 massiiv = maze_andmed['maze']
@@ -42,6 +43,8 @@ helid = [
 
 def mangi_muusikat():
     pygame.mixer.Sound.play(helid[random.randint(0, len(helid)-1)])
+
+    
 pygame.init()
 ekraan = pygame.display.set_mode((800, 600))
 
@@ -78,9 +81,18 @@ def liiguta_mangijat(suund, massiiv):#joonistab mängija uuel kordinaadil ja kor
                 player_information['votmed'] = player_information['votmed'] - 1
                 maagia(a, suund, massiiv)
         elif [a[0] + suund[0], a[1] + suund[1]] in maze_andmed['ringid']:
+            """
             maze_andmed['ringid'].remove([a[0] + suund[0], a[1] + suund[1]])
             player_information['skoor'] = player_information['skoor'] + 1
             print(player_information['skoor'])
+            """
+
+            tekst = twobuttonjoust.startTheGame()
+            maze_andmed['ringid'].remove([a[0] + suund[0], a[1] + suund[1]])
+            pygame.draw.rect(ekraan, [40, 40, 40], [0, 0, 800, 600], 0)
+            if tekst == ("w"):
+                player_information['skoor'] += 1
+                print(player_information['skoor'])
             maagia(a, suund, massiiv)
             
         else:
